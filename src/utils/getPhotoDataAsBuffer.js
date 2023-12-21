@@ -1,7 +1,7 @@
 const axios = require('axios')
 
 /**
- * Fetches photo data from an external url and returns a Buffer
+ * Demo helper function for fetching photo data as a Buffer from an external url
  * @param {string} url - photo url
  * @returns {Buffer} - photo data as a buffer
  */
