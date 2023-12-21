@@ -1,4 +1,5 @@
 const { decryptCertificateFields, certifierSignCheckArgs, certifierCreateSignedCertificate } = require('authrite-utils')
+const { getVerificationProof, saveCertificate } = require('../utils/databaseHelpers')
 const { Ninja } = require('ninja-base')
 const pushdrop = require('pushdrop')
 const { getPaymentPrivateKey } = require('sendover')
@@ -85,18 +86,17 @@ module.exports = {
       // Save the sender's identityKey as the subject of the certificate
       req.body.subject = req.authrite.identityKey
 
-      // TODO: Make sure this certificate has been verified
-      // const results = await getVerificationProof(req.authrite.identityKey)
-      // const results = await
+      // Make sure this certificate has been verified
+      const results = await getVerificationProof(req.authrite.identityKey)
 
-      // TODO: Make sure a validated verificationId is been added and the certificate is not already expired
-      // if (!results || !results.verificationId || !results.expirationDate || (new Date(results.expirationDate) < new Date())) {
-      //   return res.status(400).json({
-      //     status: 'error',
-      //     code: 'ERR_CERTIFICATE_NOT_VALID',
-      //     description: 'The identity certificate information has not been verified or is expired!'
-      //   })
-      // }
+      // Make sure a validated verificationId is been added and the certificate is not already expired
+      if (!results || !results.verificationId || !results.expirationDate || (new Date(results.expirationDate) < new Date())) {
+        return res.status(400).json({
+          status: 'error',
+          code: 'ERR_CERTIFICATE_NOT_VALID',
+          description: 'The identity certificate information has not been verified or is expired!'
+        })
+      }
 
       // Check encrypted fields and decrypt them
       const decryptedFields = await decryptCertificateFields(req.body, req.body.keyring, certifierPrivateKey)
@@ -183,20 +183,7 @@ module.exports = {
       })
 
       // Save certificate data and revocation key derivation information
-      // await saveCertificate(req.authrite.identityKey, certificate, tx, derivationPrefix, derivationSuffix)
-      // TODO: Generalize base functions that anyone can easily implement with whatever storage medium they want.
-      fs.writeFile('./certificate.json', JSON.stringify(certificate), (err) => {
-        if (err) {
-          console.error(err)
-          return res.status(400).json({ // 204 might be better
-            status: 'failed',
-            description: 'Failed to verify the submitted attributes!'
-          })
-        } else {
-          // res.send('File written successfully')
-          console.log('success')
-        }
-      })
+      await saveCertificate(req.authrite.identityKey, certificate, tx, derivationPrefix, derivationSuffix)
 
       // Returns signed cert to the requester
       return res.status(200).json(certificate)

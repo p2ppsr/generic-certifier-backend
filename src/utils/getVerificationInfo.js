@@ -1,17 +1,5 @@
-const {
-  PERSONA_TOKEN
-} = process.env
-
+// TODO: Consider rename
 const getVerificationInfo = async (verificationId) => {
-  // Validate the verificationId using the Persona API
-  // const response = await fetch(`https://withpersona.com/api/v1/inquiries/${verificationId}`, {
-  //   method: 'GET',
-  //   headers: {
-  //     Authorization: `Bearer ${PERSONA_TOKEN}`
-  //   }
-  // })
-
-  // return await response.json()
-  return true
+  // Validate the verification info with external API as needed
 }
 module.exports = { getVerificationInfo }

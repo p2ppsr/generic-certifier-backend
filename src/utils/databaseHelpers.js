@@ -1,139 +1,80 @@
-const { MongoClient } = require('mongodb')
-
-const {
-  NODE_ENV
-} = process.env
-
-let mongoClient
-const DB_NAME = `${NODE_ENV}_googcert`
+const fs = require('fs')
 
 async function connectToMongoDB () {
-  if (!mongoClient) {
-    try {
-      mongoClient = new MongoClient(process.env.GOOGCERT_DB_CONNECTION, { useUnifiedTopology: true })
-      await mongoClient.connect()
-      console.log('Connected to MongoDB')
-    } catch (err) {
-      console.error('Error connecting to MongoDB:', err)
-      // Handle error, e.g., throw an exception or exit the application.
-    }
-  }
+  // Internal helper function
 }
 
 async function getMongoClient () {
-  if (!mongoClient) {
-    await connectToMongoDB()
-  }
-  return mongoClient
+  // Internal helper function
 }
 
+/**
+ * Saves record of a newly issued certificate
+ * @param {string} identityKey
+ * @param {object} certificate
+ * @param {string} tx
+ * @param {string} derivationPrefix
+ * @param {string} derivationSuffix
+ */
 const saveCertificate = async (identityKey, certificate, tx, derivationPrefix, derivationSuffix) => {
-  const mongoClient = await getMongoClient()
   // Updates certificate issuances data for a verified identity
-  const filter = {
-    identityKey,
-    verificationId: { $ne: undefined }
-  }
-  const update = {
-    $set: {
-      certificate,
-      tx,
-      derivationPrefix,
-      derivationSuffix,
-      updatedAt: new Date()
-    }
-  }
 
-  await mongoClient.db(`${DB_NAME}`).collection('certifications').updateOne(filter, update)
+  fs.writeFile('./certificate.json', JSON.stringify(certificate), (err) => {
+    if (err) {
+      console.error(err)
+      throw new Error(err)
+    } else {
+      // res.send('File written successfully')
+      console.log('success')
+    }
+  })
 }
 
+/**
+ * Saves proof of attribute verification
+ * @param {string} identityKey
+ * @param {string} verificationId
+ * @param {Date | string} expirationDate
+ */
 const saveVerificationProof = async (identityKey, verificationId, expirationDate) => {
-  const mongoClient = await getMongoClient()
-
   // Insert verification proof for a new certificate
-  await mongoClient.db(`${DB_NAME}`).collection('certifications').insertOne({
-    identityKey,
-    verificationId,
-    expirationDate,
-    createdAt: new Date()
-  })
-}
-
-const getVerificationProof = async (identityKey) => {
-  const mongoClient = await getMongoClient()
-
   // Filter by identity key and verificationId
-  const filter = {
-    identityKey,
-    verificationId: { $ne: undefined }
-  }
-
   // Only select relevant data
-  const projection = {
-    verificationId: 1,
-    expirationDate: 1
-  }
-
   // Return the matching result
-  return await mongoClient.db(`${DB_NAME}`).collection('certifications').findOne(filter, { projection })
 }
 
+/**
+ * Returns verification proof for a given search query (in this case a user's identity key)
+ * @param {string} identityKey
+ * @returns
+ */
+const getVerificationProof = async (identityKey) => {
+  // Filter by identity key and verificationId
+  // Only select relevant data
+  // Return the matching result
+  return {
+    verificationId: 'mockVerificationId',
+    expirationDate: new Date() + 100000
+  }
+}
+
+/**
+ * Returns revocation data associarted with a user and a certificate
+ * @param {string} identityKey
+ * @param {string} serialNumber
+ */
 const getRevocationData = async (identityKey, serialNumber) => {
-  const mongoClient = await getMongoClient()
-
   // Filter by identity key or certificate serialNumber
-  const filter = {
-    $or: [
-      { identityKey },
-      { 'certificate.serialNumber': serialNumber }
-    ]
-  }
-
   // Only select relevant data
-  const projection = {
-    tx: 1,
-    derivationPrefix: 1,
-    derivationSuffix: 1,
-    'certificate.serialNumber': 1,
-    _id: 1
-  }
-
-  // Return the matching result
-  return await mongoClient.db(`${DB_NAME}`).collection('certifications').findOne(filter, { projection })
 }
 
+/**
+ * Inserts a new revocation record (consider integration with an overlay network in the future)
+ * @param {string} _id
+ * @param {string} tx
+ */
 const insertRevocationRecord = async (_id, tx) => {
-  const mongoClient = await getMongoClient()
-  // Add the revocation tx to the revoked certificate
-  const filter = {
-    _id
-  }
-  const update = {
-    $set: {
-      revocationTx: tx,
-      updatedAt: new Date()
-    }
-  }
-
-  await mongoClient.db(`${DB_NAME}`).collection('certifications').updateOne(filter, update)
-}
-
-const deleteUserData = async (identityKey) => {
-  const mongoClient = await getMongoClient()
-
-  await mongoClient.db(`${DB_NAME}`).collection('certifications').deleteMany({
-    identityKey
-  })
-}
-
-const loadCertificate = async (identityKey) => {
-  const mongoClient = await getMongoClient()
-
-  const results = await mongoClient.db(`${DB_NAME}`).collection('certifications').find({
-    identityKey
-  }).project({ certificate: 1 }).toArray()
-
-  return results
+  // TODO: Add the revocation tx to the revoked certificate
 }
 
 module.exports = {
@@ -141,8 +82,6 @@ module.exports = {
   saveVerificationProof,
   getVerificationProof,
   getRevocationData,
-  loadCertificate,
-  deleteUserData,
   insertRevocationRecord,
   connectToMongoDB,
   getMongoClient

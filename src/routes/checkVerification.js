@@ -3,7 +3,7 @@ const { getVerificationInfo } = require('../utils/getVerificationInfo')
 module.exports = {
   type: 'post',
   path: '/checkVerification',
-  summary: 'Submit KYC verification proof for the current user',
+  summary: 'Checks that attribute verification has already been done.',
   parameters: {
     verificationId: '',
     certificateFields: {}
