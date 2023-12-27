@@ -1,4 +1,4 @@
-# Generic Certificate Backend
+# Generic Certifier Backend
 
 Generic Certificate Issuance Server
 
