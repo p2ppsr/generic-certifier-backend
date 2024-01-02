@@ -4,7 +4,6 @@ Generic Certificate Issuance Server
 
 ## Generic Certificate
 
-- id
 - firstName
 - lastName
 - profilePhoto
