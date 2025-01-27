@@ -11,10 +11,13 @@ import express, { Request, Response } from 'express'
 import { AuthMiddlewareOptions, createAuthMiddleware } from '@bsv/auth-express-middleware'
 import { createPaymentMiddleware } from '@bsv/payment-express-middleware'
 import { Wallet } from 'wallet-storage'
+import { CertifierStorage } from './storage'
+import * as routes from './routes'
 
 export interface CertifierServerOptions {
   port: number
   wallet: Wallet
+  storage: CertifierStorage
   monetize: boolean
   calculateRequestPrice?: (req: Request) => number | Promise<number>
 }
@@ -34,7 +37,7 @@ export class CertifierServer {
 
     private app = express()
     private port: number
-    private storage: any
+    private storage: CertifierStorage
     private wallet: Wallet
     private monetize: boolean
     private calculateRequestPrice?: (req: Request) => number | Promise<number>
@@ -43,6 +46,7 @@ export class CertifierServer {
         this.storage = storage
         this.port = options.port
         this.wallet = options.wallet
+        this.storage = options.storage
         this.monetize = options.monetize
         this.calculateRequestPrice = options.calculateRequestPrice
 
@@ -80,11 +84,16 @@ export class CertifierServer {
             )
         }
 
-        const routes: CertifierRoute[] = [
-
+        const theRoutes: CertifierRoute[] = [
+            routes.checkVerification,
+            routes.confirmCertificate,
+            routes.initialRequest,
+            routes.revokeCertificate,
+            routes.signCertificate,
+            routes.verifyAttributes
         ]
 
-        for (const route of routes) {
+        for (const route of theRoutes) {
             this.app[route.type](`${route.path}`, async (req: Request, res: Response) => {
                 return route.func(req, res, this)
             })

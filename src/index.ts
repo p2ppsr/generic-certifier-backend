@@ -3,7 +3,6 @@ import * as bsv from '@bsv/sdk'
 import {
   test,
   Services,
-  StorageKnex,
   table,
   WalletStorageManager,
   WalletStorageServerOptions,
@@ -15,6 +14,7 @@ import { Knex, knex as makeKnex } from 'knex'
 import { spawn } from 'child_process'
 import * as dotenv from 'dotenv'
 import { CertifierServer, CertifierServerOptions } from './CertifierServer'
+import { CertifierStorage } from './storage'
 
 dotenv.config()
 
@@ -53,7 +53,6 @@ async function setupCertifierServer(): Promise<{
       endpointUrl: undefined // Choose you wallet server or build a different kind of wallet.
     })
 
-    /*
     // You can also use an imported knex configuration file.
     const knexConfig: Knex.Config = {
       client: 'mysql2',
@@ -71,33 +70,16 @@ async function setupCertifierServer(): Promise<{
       }
     }
     const knex = makeKnex(knexConfig)
-    const chain = NODE_ENV === 'production' ? 'main' : 'test'
 
-    // Initialize storage components
-    const rootKey = bsv.PrivateKey.fromHex(SERVER_PRIVATE_KEY)
-    const storageIdentityKey = rootKey.toPublicKey().toString()
-
-    const activeStorage = new StorageKnex({
-      chain,
-      knex,
-    })
-
-    await activeStorage.migrate(databaseName, storageIdentityKey)
-    const settings = await activeStorage.makeAvailable()
-
-    const storage = new WalletStorageManager(settings.storageIdentityKey, activeStorage)
+    const storage = new CertifierStorage(knex, chain)
+    await storage.migrate()
     await storage.makeAvailable()
-
-    // Initialize wallet components
-    const services = new Services(chain)
-    const keyDeriver = new bsv.KeyDeriver(rootKey)
-    const wallet = new Wallet({ chain, keyDeriver, storage, services })
-    */
 
     // Set up server options
     const serverOptions: CertifierServerOptions = {
       port: Number(HTTP_PORT),
       wallet,
+      storage,
       monetize: false,
       calculateRequestPrice: async () => {
         return 0 // Monetize your server here! Price is in satoshis.
