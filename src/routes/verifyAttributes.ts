@@ -1,6 +1,7 @@
-const fs = require('fs')
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { CertifierRoute } from '../CertifierServer'
 
-module.exports = {
+export const verifyAttributes: CertifierRoute = {
   type: 'post',
   path: '/verifyAttributes',
   summary: 'Attempts to verify submitted attributes',
@@ -15,13 +16,14 @@ module.exports = {
   exampleResponse: {
     status: 'verified | notVerified'
   },
-  func: async (req, res) => {
+  func: async (req, res, server) => {
     try {
       const attributesVerifiedWithSomeRandomService = () => {
         return true
       }
 
-      if (attributesVerifiedWithSomeRandomService) {
+      if (attributesVerifiedWithSomeRandomService()) {
+        /*
         fs.writeFile('./test.json', JSON.stringify(req.body.attributes), (err) => {
           if (err) {
             console.error(err)
@@ -33,6 +35,7 @@ module.exports = {
             console.log('success')
           }
         })
+          */
 
         return res.status(200).json({
           status: 'passed',

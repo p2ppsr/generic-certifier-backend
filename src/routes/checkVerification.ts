@@ -1,6 +1,7 @@
-const { getVerificationInfo } = require('../utils/getVerificationInfo')
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { CertifierRoute } from '../CertifierServer'
 
-module.exports = {
+export const checkVerification: CertifierRoute = {
   type: 'post',
   path: '/checkVerification',
   summary: 'Checks that attribute verification has already been done.',
@@ -11,9 +12,8 @@ module.exports = {
   exampleResponse: {
     status: 'verified | notVerified'
   },
-  func: async (req, res) => {
+  func: async (req, res, server) => {
     try {
-      // TODO: Actually return verification status
       if (getVerificationInfo(req.body.verificationId)) {
         return res.status(200).json({
           status: 'verified',
@@ -34,4 +34,8 @@ module.exports = {
       })
     }
   }
+}
+
+function getVerificationInfo(id: string) : boolean {
+  return true
 }

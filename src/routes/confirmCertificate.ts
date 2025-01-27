@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { CertifierRoute } from '../CertifierServer'
 /*
  * NOTE: Is this route required?
  * This route can be used to confirm that a valid certificate exists and
@@ -12,7 +14,7 @@
  * If no certificate was received a status of 'nocertificate' is returned.
  *
  */
-module.exports = {
+export const confirmCertificate: CertifierRoute = {
   type: 'post',
   path: '/confirmCertificate',
   summary: 'Confirm receipt of a valid certificate via authrite',
@@ -23,7 +25,7 @@ module.exports = {
   exampleResponse: {
     status: 'success | nocertificate'
   },
-  func: async (req, res) => {
+  func: async (req, res, server) => {
     try {
       let found = false
       for (let i = 0; i < req.authrite.certificates.length; i++) {

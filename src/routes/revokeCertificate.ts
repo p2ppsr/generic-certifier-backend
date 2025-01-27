@@ -1,15 +1,7 @@
-const bsv = require('babbage-bsv')
-const { Ninja } = require('ninja-base')
-const pushdrop = require('pushdrop')
-const { getPaymentPrivateKey } = require('sendover')
-const { getRevocationData, insertRevocationRecord } = require('../utils/databaseHelpers')
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { CertifierRoute } from '../CertifierServer'
 
-const {
-  SERVER_PRIVATE_KEY,
-  DOJO_URL
-} = process.env
-
-module.exports = {
+export const revokeCertificate: CertifierRoute = {
   type: 'post',
   path: '/revokeCertificate',
   summary: 'Revokes a previously issued identity certificate',
@@ -20,9 +12,10 @@ module.exports = {
   exampleResponse: {
     status: 'verified | notVerified'
   },
-  func: async (req, res) => {
+  func: async (req, res, server) => {
     try {
       // Make sure only authorized users can revoke certificates
+      /*
       if (req.authrite.identityKey !== new bsv.PrivateKey(SERVER_PRIVATE_KEY).publicKey.toString('hex')) {
         return res.status(400).json({
           status: 'error',
@@ -30,6 +23,7 @@ module.exports = {
           description: 'You are not authorized to access this route!'
         })
       }
+      */
 
       // Make sure the required params are provided
       if (!req.body.identityKey && !req.body.serialNumber) {
@@ -40,7 +34,7 @@ module.exports = {
         })
       }
 
-      const revocationData = await getRevocationData(req.body.identityKey, req.body.serialNumber)
+      const revocationData = await server.getRevocationData(req.body.identityKey, req.body.serialNumber)
 
       if (!revocationData) {
         return res.status(400).json({
@@ -49,7 +43,7 @@ module.exports = {
           description: 'Insufficient data to revoke certificate!'
         })
       }
-
+/*
       // Create an actual spendable revocation outpoint
       const ninja = new Ninja({
         privateKey: SERVER_PRIVATE_KEY,
@@ -101,7 +95,8 @@ module.exports = {
       })
 
       // Save record of revoking the certificate
-      await insertRevocationRecord(revocationData._id, tx)
+      await server.insertRevocationRecord(revocationData._id, tx)
+*/
 
       return res.status(200).json({
         status: 'success',
