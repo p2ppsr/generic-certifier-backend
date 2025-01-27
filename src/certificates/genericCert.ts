@@ -11,18 +11,15 @@
 // certificate structure definition.
 //
 // The purpose of this certificate is to server as a self-certified external identity to
+
+import { Base64String, CertificateFieldNameUnder50Bytes } from "@bsv/sdk"
+
 // be associated with the certificate owner.
-const certificateType = 'h53Tvo8w3nqeF2cPyuRUc/B+gjPXJ3gPS2PKFBZfpDw='
-const certificateDefinition = {
+export const certificateType: Base64String = 'h53Tvo8w3nqeF2cPyuRUc/B+gjPXJ3gPS2PKFBZfpDw='
+export const certificateDefinition: Record<CertificateFieldNameUnder50Bytes, string> = {
   firstName: 'John',
   lastName: 'Smith',
   profilePhoto: 'urhp://...',
   skill: 'Kempo Martial Arts'
 }
-const certificateFields = Object.keys(certificateDefinition)
-
-module.exports = {
-  certificateType,
-  certificateDefinition,
-  certificateFields
-}
+export const certificateFields: CertificateFieldNameUnder50Bytes[] = Object.keys(certificateDefinition)

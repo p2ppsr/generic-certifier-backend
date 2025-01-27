@@ -1,23 +1,6 @@
-const { decryptCertificateFields, certifierSignCheckArgs, certifierCreateSignedCertificate } = require('authrite-utils')
-const { getVerificationProof, saveCertificate } = require('../utils/databaseHelpers')
-const { Ninja } = require('ninja-base')
-const pushdrop = require('pushdrop')
-const { getPaymentPrivateKey } = require('sendover')
-const bsv = require('babbage-bsv')
-const crypto = require('crypto')
-const fs = require('fs')
-
-const {
-  SERVER_PRIVATE_KEY,
-  DOJO_URL
-} = process.env
-
-const {
-  certifierPrivateKey,
-  certificateType,
-  certificateFields
-} = require('../certifier')
-
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { certificateFields } from '../certificates/genericCert'
+import { CertifierRoute } from '../CertifierServer'
 /*
  * This route handles signCertificate for the createCertificate protocol.
  *
@@ -29,7 +12,7 @@ const {
  *
  * As an optional next step, the confirmCertificate route can be used.
  */
-module.exports = {
+export const signCertificate: CertifierRoute = {
   type: 'post',
   path: '/signCertificate',
   summary: 'Validate and sign a new certificate. Requested as a side effect of AuthriteClient.createCertificate.',
@@ -69,13 +52,12 @@ module.exports = {
     certifier: '025384871bedffb233fdb0b4899285d73d0f0a2b9ad18062a062c01c8bdb2f720a',
     signature: '3045022100a613d9a094fac52779b29c40ba6c82e8deb047e45bda90f9b15e976286d2e3a7022017f4dead5f9241f31f47e7c4bfac6f052067a98021281394a5bc859c5fb251cc'
   },
-  func: async (req, res) => {
+  func: async (req, res, server) => {
     try {
-      const checkError = certifierSignCheckArgs({
+      const checkError = server.certifierSignCheckArgs({
         ...req.body,
-        certifierPrivateKey,
-        certificateType
       })
+
       if (checkError) {
         return res.status(400).json({
           status: 'error',
@@ -87,7 +69,7 @@ module.exports = {
       req.body.subject = req.authrite.identityKey
 
       // Make sure this certificate has been verified
-      const results = await getVerificationProof(req.authrite.identityKey)
+      const results = await server.getVerificationProof(req.authrite.identityKey)
 
       // Make sure a validated verificationId is been added and the certificate is not already expired
       if (!results || !results.verificationId || !results.expirationDate || (new Date(results.expirationDate) < new Date())) {
@@ -99,7 +81,7 @@ module.exports = {
       }
 
       // Check encrypted fields and decrypt them
-      const decryptedFields = await decryptCertificateFields(req.body, req.body.keyring, certifierPrivateKey)
+      const decryptedFields = await server.decryptCertificateFields(req.body, req.body.keyring)
       const expectedFields = certificateFields
 
       // Only validate the expected field keys?
@@ -110,24 +92,7 @@ module.exports = {
           description: 'One or more expected certificate fields is missing or invalid.'
         })
       }
-
-      // Create an actual spendable revocation outpoint
-      const ninja = new Ninja({
-        privateKey: SERVER_PRIVATE_KEY,
-        config: {
-          dojoURL: DOJO_URL
-        }
-      })
-
-      // Random key derivation data
-      const derivationPrefix = crypto
-        .randomBytes(10)
-        .toString('base64')
-      const derivationSuffix = crypto
-        .randomBytes(10)
-        .toString('base64')
-      const invoiceNumber = `2-3241645161d8-${derivationPrefix} ${derivationSuffix}`
-
+/*
       // Derive a new key for the revocation tx locking script
       const derivedPrivateKey = getPaymentPrivateKey({
         recipientPrivateKey: SERVER_PRIVATE_KEY,
@@ -184,8 +149,9 @@ module.exports = {
 
       // Save certificate data and revocation key derivation information
       await saveCertificate(req.authrite.identityKey, certificate, tx, derivationPrefix, derivationSuffix)
-
+*/
       // Returns signed cert to the requester
+      const certificate = {}
       return res.status(200).json(certificate)
     } catch (e) {
       console.error(e)

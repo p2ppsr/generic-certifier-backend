@@ -1,13 +1,11 @@
-const {
-  certifierPublicKey,
-  certificateType,
-  certificateFields
-} = require('../certifier')
-
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { certifierPublicKey } from '..'
+import { certificateFields, certificateType } from '../certificates/genericCert'
+import { CertifierRoute } from '../CertifierServer'
 /*
  * This route returns the certifier's public key and certificate types.
  */
-module.exports = {
+export const confirmCertificate: CertifierRoute = {
   type: 'post',
   path: '/identify',
   summary: 'Identify Certifier by returning certifierPublicKey and certificateTypes.',
@@ -18,7 +16,7 @@ module.exports = {
       [certificateType, certificateFields]
     ]
   },
-  func: async (req, res) => {
+  func: async (req, res, server) => {
     try {
       return res.status(200).json({
         status: 'success',
