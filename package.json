@@ -1,19 +1,19 @@
 {
-  "name": "wallet-infra",
+  "name": "generic-certifier-backend",
   "version": "0.1.0",
-  "description": "UTXO Management Server",
-  "author": "BSV Blockchain Association",
+  "description": "Certificate Authority for issuing Generic Certificates",
+  "author": "Peer-to-peer Privacy Systems Research LLC",
   "license": "SEE LICENSE IN LICENSE.txt",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bitcoin-sv/wallet-infra.git"
+    "url": "git+https://github.com/p2ppsr/generic-certifier-backen.git"
   },
   "keywords": [
     "BSV",
     "Blockchain",
     "Bitcoin",
     "Wallet",
-    "Infrastructure"
+    "Certifier"
   ],
   "main": "./out/src/index.js",
   "types": "./out/src/index.d.ts",
@@ -41,12 +41,12 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@bsv/sdk": "^1.3.8",
+    "@bsv/sdk": "^1.3.9",
     "body-parser": "^1.20.2",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "knex": "^3.1.0",
     "mysql2": "^3.12.0",
-    "wallet-storage": "^0.0.31"
+    "wallet-storage": "^0.0.40"
   }
 }

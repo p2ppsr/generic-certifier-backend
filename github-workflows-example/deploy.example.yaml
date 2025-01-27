@@ -9,7 +9,7 @@ env:
   CURRENT_BRANCH: ${{ github.ref_name =='production' && 'production' || 'master' }}
   GCR_HOST: us.gcr.io
   GOOGLE_PROJECT_ID: <> # Fill in your Google Cloud project ID
-  GCR_IMAGE_NAME: utxo-management-server
+  GCR_IMAGE_NAME: generic-certifier
 
 jobs:
   build:

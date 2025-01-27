@@ -1,9 +1,9 @@
 services:
-  utxo-management-server:
+  generic-certifier:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: utxo-management-server
+    container_name: generic-certifier
     restart: always
     ports:
       - "8080:8080"        # Map host:8080 to container:8080 (Node server)
@@ -17,7 +17,7 @@ services:
       HTTP_PORT: "8080"
       SERVER_PRIVATE_KEY: "bffe0d7a3f7effce2b3511323c6cca1df1649e41a336a8b603194d53287ad285" # This is a throwaway test key
       # Fill in the DB credentials as a JSON object or direct URL
-      KNEX_DB_CONNECTION: '{"host":"mysql","user":"root","password":"rootPass","database":"wallet_storage","port":3306}'
+      KNEX_DB_CONNECTION: '{"host":"mysql","user":"root","password":"rootPass","database":"generic_certifier_storage","port":3306}'
     depends_on:
       - mysql   # ensures MySQL starts before the Node service tries to connect
 
@@ -25,7 +25,7 @@ services:
     image: mysql:8
     container_name: mysql
     environment:
-      MYSQL_DATABASE: wallet_storage
+      MYSQL_DATABASE: generic_certifier_storage
       MYSQL_ROOT_PASSWORD: rootPass 
     ports:
       - "3306:3306"

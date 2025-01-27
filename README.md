@@ -62,7 +62,7 @@ Built on the [wallet-toolbox](https://github.com/bitcoin-sv/wallet-toolbox), thi
 Below are steps for **running locally** using **Docker Compose**: 
 this will spin up:
 1. A MySQL container
-2. The “utxo-management-server” container with Node.js
+2. The “generic-certifier” container with Node.js
 
 ### Requirements
 
@@ -92,7 +92,7 @@ this will spin up:
        NODE_ENV: development
        HTTP_PORT: "8080"
        SERVER_PRIVATE_KEY: "bffe0d7a3f7effce2b3511323c6cca1df1649e41a336a8b603194d53287ad285"
-       KNEX_DB_CONNECTION: '{"host":"mysql","user":"root","password":"rootPass","database":"wallet_storage","port":3306}'
+       KNEX_DB_CONNECTION: '{"host":"mysql","user":"root","password":"rootPass","database":"generic_certifier_storage","port":3306}'
      ```
    - You can edit these in `docker-compose.yml` to suit your environment. 
 
@@ -111,8 +111,8 @@ Make sure Docker is running on your machine, then run the following command:
 5. **Check logs**:
    - You should see something like:
      ```
-     utxo-management-server  | wallet-storage server v0.4.5
-     utxo-management-server  | wallet-storage server started
+     generic-certifier  | wallet-storage server v0.4.5
+     generic-certifier  | wallet-storage server started
      ```
    - This indicates the system is ready and listening on `http://localhost:8080`.
 
@@ -169,16 +169,16 @@ CMD [ "node", "out/src/index.js"]
 
 1. **Build** your image:
    ```bash
-   docker build -t gcr.io/PROJECT_ID/utxo-management-server:latest .
+   docker build -t gcr.io/PROJECT_ID/generic-certifier:latest .
    ```
 2. **Push** to your GCR or Artifact Registry:
    ```bash
-   docker push gcr.io/PROJECT_ID/utxo-management-server:latest
+   docker push gcr.io/PROJECT_ID/generic-certifier:latest
    ```
 3. **Deploy** to Cloud Run:
    ```bash
-   gcloud run deploy utxo-management-server \
-     --image gcr.io/PROJECT_ID/utxo-management-server:latest \
+   gcloud run deploy generic-certifier \
+     --image gcr.io/PROJECT_ID/generic-certifier:latest \
      --region=us-west1 \
      --platform=managed \
      --allow-unauthenticated \
@@ -224,16 +224,16 @@ jobs:
 
       - name: Build
         run: |
-          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/utxo-management-server:${{ github.sha }} .
+          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/generic-certifier:${{ github.sha }} .
       
       - name: Push Docker image
         run: |
-          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/utxo-management-server:${{ github.sha }}
+          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/generic-certifier:${{ github.sha }}
       
       - name: Deploy
         run: |
-          gcloud run deploy utxo-management-server \
-            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/utxo-management-server:${{ github.sha }} \
+          gcloud run deploy generic-certifier \
+            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/generic-certifier:${{ github.sha }} \
             --region=us-west1 \
             --platform=managed \
             --allow-unauthenticated \

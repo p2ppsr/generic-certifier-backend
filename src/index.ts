@@ -6,9 +6,7 @@ import {
   WalletStorageManager,
   WalletStorageServerOptions,
   StorageServer,
-  sdk,
   Wallet,
-  WalletSigner
 } from 'wallet-storage'
 import { Knex, knex as makeKnex } from 'knex'
 import { spawn } from 'child_process'
@@ -32,7 +30,6 @@ async function setupWalletStorageAndMonitor(): Promise<{
   services: Services
   settings: table.Settings
   keyDeriver: bsv.KeyDeriver
-  signer: sdk.WalletSigner
   wallet: Wallet
   server: StorageServer
 }> {
@@ -87,8 +84,7 @@ async function setupWalletStorageAndMonitor(): Promise<{
     // Initialize wallet components
     const services = new Services(chain)
     const keyDeriver = new bsv.KeyDeriver(rootKey)
-    const signer = new WalletSigner(chain, keyDeriver, storage)
-    const wallet = new Wallet(signer, keyDeriver, services)
+    const wallet = new Wallet({ chain, keyDeriver, storage, services })
 
     // Set up server options
     const serverOptions: WalletStorageServerOptions = {
@@ -109,7 +105,6 @@ async function setupWalletStorageAndMonitor(): Promise<{
       services,
       settings,
       keyDeriver,
-      signer,
       wallet,
       server
     }
