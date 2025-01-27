@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import * as bsv from '@bsv/sdk'
 import {
+  test,
   Services,
   StorageKnex,
   table,
@@ -8,6 +9,7 @@ import {
   WalletStorageServerOptions,
   StorageServer,
   Wallet,
+  sdk
 } from 'wallet-storage'
 import { Knex, knex as makeKnex } from 'knex'
 import { spawn } from 'child_process'
@@ -42,6 +44,14 @@ async function setupCertifierServer(): Promise<{
 
     const certifierPrivateKey = bsv.PrivateKey.fromString(SERVER_PRIVATE_KEY)
     certifierPublicKey = certifierPrivateKey.toPublicKey().toString()
+
+    const chain: sdk.Chain = NODE_ENV === 'development' ? 'test' : 'main'
+
+    const { wallet } = await test._tu.createTestWalletWithStorageClient({
+      chain,
+      rootKeyHex: certifierPrivateKey.toHex(),
+      endpointUrl: undefined // Choose you wallet server or build a different kind of wallet.
+    })
 
     /*
     // You can also use an imported knex configuration file.
@@ -87,7 +97,7 @@ async function setupCertifierServer(): Promise<{
     // Set up server options
     const serverOptions: CertifierServerOptions = {
       port: Number(HTTP_PORT),
-      wallet: {} as Wallet,
+      wallet,
       monetize: false,
       calculateRequestPrice: async () => {
         return 0 // Monetize your server here! Price is in satoshis.
