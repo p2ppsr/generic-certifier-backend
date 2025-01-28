@@ -46,6 +46,9 @@ export class CertifierStorage {
   }
 
   async insertCertificate(certificate: table.CertificateX): Promise<number> {
+    certificate.certificateId = 0
+    certificate.created_at = new Date()
+    certificate.updated_at = new Date()
     const e: any = certificate
     const fields = e.fields
     if (e.fields) delete e.fields
@@ -55,8 +58,9 @@ export class CertifierStorage {
 
     if (fields) {
       for (const field of fields) {
+        field.created_at = new Date()
+        field.updated_at = new Date()
         field.certificateId = id
-        field.userId = certificate.userId
         await this.insertCertificateField(field)
       }
     }

@@ -62,7 +62,6 @@ export class KnexMigrations implements MigrationSource<string> {
                 await knex.schema.createTable('certificates', table => {
                     addTimeStamps(knex, table)
                     table.increments('certificateId')
-                    table.integer('userId').unsigned().references('userId').inTable('users').notNullable()
                     table.string('serialNumber', 100).notNullable()
                     table.string('type', 100).notNullable()
                     table.string('certifier', 100).notNullable()
@@ -74,7 +73,6 @@ export class KnexMigrations implements MigrationSource<string> {
                 })
                 await knex.schema.createTable('certificate_fields', table => {
                     addTimeStamps(knex, table)
-                    table.integer('userId').unsigned().references('userId').inTable('users').notNullable()
                     table.integer('certificateId').unsigned().references('certificateId').inTable('certificates').notNullable()
                     table.string('fieldName', 100).notNullable()
                     table.string('fieldValue').notNullable()

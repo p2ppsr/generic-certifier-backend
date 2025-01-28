@@ -4,7 +4,6 @@ import { sdk } from "wallet-storage"
 export interface CertificateField extends sdk.EntityTimeStamp {
    created_at: Date
    updated_at: Date
-   userId: number
    certificateId: number
    fieldName: string
    fieldValue: string
