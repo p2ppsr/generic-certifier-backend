@@ -1,12 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/**
- * CertifierServer.ts
- *
- * A server-side class that "has a" local WalletStorage (like a StorageKnex instance),
- * and exposes it via a JSON-RPC POST endpoint using Express.
- */
-
-import { CertificateFieldNameUnder50Bytes, WalletInterface } from '@bsv/sdk'
+import { WalletInterface } from '@bsv/sdk'
 import express, { Request, Response } from 'express'
 import { AuthMiddlewareOptions, createAuthMiddleware } from '@bsv/auth-express-middleware'
 import { createPaymentMiddleware } from '@bsv/payment-express-middleware'
@@ -34,7 +26,6 @@ export interface CertifierRoute {
 }
 
 export class CertifierServer {
-
   private app = express()
   private port: number
   private storage: CertifierStorage
@@ -71,10 +62,10 @@ export class CertifierServer {
       }
     })
 
-    const options: AuthMiddlewareOptions = {
+    // Configure the auth and payment middleware
+    this.app.use(createAuthMiddleware({
       wallet: this.wallet as WalletInterface
-    }
-    this.app.use(createAuthMiddleware(options))
+    }))
     if (this.monetize) {
       this.app.use(
         createPaymentMiddleware({
@@ -84,13 +75,12 @@ export class CertifierServer {
       )
     }
 
+    // Setup the express routes for this server
     const theRoutes: CertifierRoute[] = [
-      routes.checkVerification,
-      routes.confirmCertificate,
-      routes.initialRequest,
-      routes.revokeCertificate,
+      routes.verifyAttributes,
       routes.signCertificate,
-      routes.verifyAttributes
+      routes.checkVerification,
+      routes.revokeCertificate
     ]
 
     for (const route of theRoutes) {
@@ -107,28 +97,7 @@ export class CertifierServer {
   }
 
   /**
-   * Returns revocation data associarted with a user and a certificate
-   * @param {string} identityKey
-   * @param {string} serialNumber
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
-  async getRevocationData(identityKey: string, serialNumber: string): Promise<any> {
-    // Filter by identity key or certificate serialNumber
-    // Only select relevant data
-  }
-
-  /**
-   * Inserts a new revocation record (consider integration with an overlay network in the future)
-   * @param {string} _id
-   * @param {string} tx
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
-  async insertRevocationRecord(id: number, tx: string): Promise<any> {
-    // TODO: Add the revocation tx to the revoked certificate
-  }
-
-  /**
-   * Checks the arguments for the certificate signing request
+   * Helper function which checks the arguments for the certificate signing request
    * @param {object} args
    * @throws {Error} if any of the required arguments are missing
    */
@@ -145,28 +114,6 @@ export class CertifierServer {
     if (!args.keyring) {
       throw new Error('Missing keyring to decrypt fields!')
     }
-  }
-
-  /**
-   * Returns verification proof for a given search query (in this case a user's identity key)
-   * @param {string} identityKey
-   * @returns
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async getVerificationProof(identityKey: string): Promise<{ verificationId: string, expirationDate: Date }> {
-    // Filter by identity key and verificationId
-    // Only select relevant data
-    // Return the matching result
-    return {
-      verificationId: 'mockVerificationId',
-      expirationDate: new Date(Date.now() + 100000)
-    }
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-  async decryptCertificateFields(cert: any, keyring: any)
-    : Promise<Record<CertificateFieldNameUnder50Bytes, string>> {
-    return {}
   }
 }
 

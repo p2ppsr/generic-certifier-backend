@@ -2,12 +2,6 @@
 import * as bsv from '@bsv/sdk'
 import {
   test,
-  Services,
-  table,
-  WalletStorageManager,
-  WalletStorageServerOptions,
-  StorageServer,
-  Wallet,
   sdk
 } from 'wallet-storage'
 import { Knex, knex as makeKnex } from 'knex'
@@ -40,19 +34,6 @@ async function setupCertifierServer(): Promise<{
     }
     // Parse database connection details
     const connection = JSON.parse(KNEX_DB_CONNECTION)
-    const databaseName = connection['database']
-
-    const certifierPrivateKey = bsv.PrivateKey.fromString(SERVER_PRIVATE_KEY)
-    certifierPublicKey = certifierPrivateKey.toPublicKey().toString()
-
-    const chain: sdk.Chain = NODE_ENV === 'development' ? 'test' : 'main'
-
-    const { wallet } = await test._tu.createTestWalletWithStorageClient({
-      chain,
-      rootKeyHex: certifierPrivateKey.toHex(),
-      endpointUrl: undefined // Choose you wallet server or build a different kind of wallet.
-    })
-
     // You can also use an imported knex configuration file.
     const knexConfig: Knex.Config = {
       client: 'mysql2',
@@ -71,15 +52,23 @@ async function setupCertifierServer(): Promise<{
     }
     const knex = makeKnex(knexConfig)
 
+    const chain: sdk.Chain = NODE_ENV === 'development' ? 'test' : 'main'
     const storage = new CertifierStorage(knex, chain)
     await storage.migrate()
     await storage.makeAvailable()
+
+    // Example wallet
+    const { wallet } = await test._tu.createTestWalletWithStorageClient({
+      chain,
+      rootKeyHex: SERVER_PRIVATE_KEY,
+      endpointUrl: undefined // Choose you wallet server or build a different kind of wallet.
+    })
 
     // Set up server options
     const serverOptions: CertifierServerOptions = {
       port: Number(HTTP_PORT),
       wallet,
-      storage,
+      storage, // Storage optional for this example!
       monetize: false,
       calculateRequestPrice: async () => {
         return 0 // Monetize your server here! Price is in satoshis.
@@ -112,7 +101,7 @@ async function setupCertifierServer(): Promise<{
       spawn('nginx', [], { stdio: ['inherit', 'inherit', 'inherit'] })
       console.log('nginx is up!')
     }
-    
+
   } catch (error) {
     console.error('Error starting server:', error)
   }
