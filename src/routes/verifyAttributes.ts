@@ -23,20 +23,6 @@ export const verifyAttributes: CertifierRoute = {
       }
 
       if (attributesVerifiedWithSomeRandomService()) {
-        /*
-        fs.writeFile('./test.json', JSON.stringify(req.body.attributes), (err) => {
-          if (err) {
-            console.error(err)
-            return res.status(400).json({ // 204 might be better
-              status: 'failed',
-              description: 'Failed to verify the submitted attributes!'
-            })
-          } else {
-            console.log('success')
-          }
-        })
-          */
-
         return res.status(200).json({
           status: 'passed',
           description: 'The attributes have been successfully verified!',

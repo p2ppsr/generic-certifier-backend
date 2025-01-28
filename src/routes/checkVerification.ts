@@ -6,15 +6,14 @@ export const checkVerification: CertifierRoute = {
   path: '/checkVerification',
   summary: 'Checks that attribute verification has already been done.',
   parameters: {
-    verificationId: '',
-    certificateFields: {}
+    attributes: {}
   },
   exampleResponse: {
     status: 'verified | notVerified'
   },
   func: async (req, res, server) => {
     try {
-      if (getVerificationInfo(req.body.verificationId)) {
+      if (getVerificationInfo(req.body.attributes.metadata.verificationId)) {
         return res.status(200).json({
           status: 'verified',
           description: 'Attributes have been verified!'
@@ -36,6 +35,7 @@ export const checkVerification: CertifierRoute = {
   }
 }
 
-function getVerificationInfo(id: string) : boolean {
+// Example function that would be used to get the verification info
+function getVerificationInfo(id: string): boolean {
   return true
 }

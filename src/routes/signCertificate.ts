@@ -1,29 +1,24 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { Certificate, CertificateFieldNameUnder50Bytes, CreateActionArgs, createNonce, MasterCertificate, PushDrop, Random, SymmetricKey, Utils, verifyNonce } from '@bsv/sdk'
 import { certificateFields } from '../certificates/genericCert'
 import { CertifierRoute } from '../CertifierServer'
+
 /*
- * This route handles signCertificate for the createCertificate protocol.
+ * This route handles signCertificate for the acquireCertificate protocol.
  *
  * It validates the certificate signing request (CSR) received from the client,
  * decrypts and validates the field values,
  * and signs the certificate and its encrypted field values.
  *
  * The validated and signed certificate is returned to the client where the client saves their copy.
- *
- * As an optional next step, the confirmCertificate route can be used.
  */
 export const signCertificate: CertifierRoute = {
   type: 'post',
   path: '/signCertificate',
-  summary: 'Validate and sign a new certificate. Requested as a side effect of AuthriteClient.createCertificate.',
+  summary: 'Validate and sign a new certificate.',
   exampleBody: {
-    messageType: 'certificateSigningRequest',
     type: 'jVNgF8+rifnz00856b4TkThCAvfiUE4p+t/aHYl1u0c=',
     clientNonce: 'VhQ3UUGl4L76T9v3M2YLd/Es25CEwAAoGTowblLtM3s=',
-    serverSerialNonce: 'BCJDJ1Bf1nu4qrE9j27lEZLxEEQ/meWESfHuX2vGlGQ=',
-    serverValidationNonce: 'H2/nAFdua/kktwXmYBn/MMgbfE9ckT3zEB6xzKhx7EM=',
-    validationKey: 'i0P2MiTG/gt1Q0aUjAfmUp0i9vIq8YEzC5FAYPzE1PU=',
-    serialNumber: 'zFpvOxvuewvvUnmE4DncNHELvlTUVs0bVOK/Z9KR3tc=',
     fields: {
       domain: '4Rp/1H7RKPE5zxhzIM5C098sRpvxRlfugVKum6spOGMQ15JBaAh+wntQuxa656JPh3iQ88nDQhqdjzE=',
       identity: 'LZzi8GCRF4SjU63lTorT9ej/Nb8MhW1hASeiJSYT7VOO+pMXJXVingKc+3+ZSW82oIl6BA==',
@@ -38,121 +33,137 @@ export const signCertificate: CertifierRoute = {
     }
   },
   exampleResponse: {
-    type: 'jVNgF8+rifnz00856b4TkThCAvfiUE4p+t/aHYl1u0c=',
-    subject: '02a1c81d78f5c404fd34c418525ba4a3b52be35328c30e67234bfcf30eb8a064d8',
-    validationKey: 'ONQPCHi7Kvus7VqrbZCYHB6zTi70U6JV+hLafN9emc8=',
-    serialNumber: 'C9JwOFjAqOVgLi+lK7HpHlxHyYtNNN/Fgp9SJmfikh0=',
-    fields: {
-      domain: '0qfi4dzxZ/+tdiDViZXOPSOSo38hHNpH89+01Rt1JaCldL+zFHhkhcYt5XO5Bd7z3yUt1zP+Sn0hq64=',
-      identity: 'f6euJ2qlRS3VRyCY1qD2fcdloUBLsDr98gqNyv/7QzKjUKo2gYQ11mzFGB/lxqAbifL4IQ==',
-      when: 'kppntXMUk035dZpTWgshdGqJPcSBvgaUG/qYEtKgOAmsNIe0wndEkUeMVqvyo5RuIrbAspbEpY3dn+J2U7HvRtmCNR9ZxEEJ',
-      stake: 'cVfowEAzvbFbAq6xIYcqi0yosFzUIcWWzCIyV0S53nMa//7JVJgZyATANog7absKajq6Qw=='
+    certificate: {
+      type: 'jVNgF8+rifnz00856b4TkThCAvfiUE4p+t/aHYl1u0c=',
+      subject: '02a1c81d78f5c404fd34c418525ba4a3b52be35328c30e67234bfcf30eb8a064d8',
+      serialNumber: 'C9JwOFjAqOVgLi+lK7HpHlxHyYtNNN/Fgp9SJmfikh0=',
+      fields: {
+        domain: '0qfi4dzxZ/+tdiDViZXOPSOSo38hHNpH89+01Rt1JaCldL+zFHhkhcYt5XO5Bd7z3yUt1zP+Sn0hq64=',
+        identity: 'f6euJ2qlRS3VRyCY1qD2fcdloUBLsDr98gqNyv/7QzKjUKo2gYQ11mzFGB/lxqAbifL4IQ==',
+        when: 'kppntXMUk035dZpTWgshdGqJPcSBvgaUG/qYEtKgOAmsNIe0wndEkUeMVqvyo5RuIrbAspbEpY3dn+J2U7HvRtmCNR9ZxEEJ',
+        stake: 'cVfowEAzvbFbAq6xIYcqi0yosFzUIcWWzCIyV0S53nMa//7JVJgZyATANog7absKajq6Qw=='
+      },
+      revocationOutpoint: '000000000000000000000000000000000000000000000000000000000000000000000000',
+      certifier: '025384871bedffb233fdb0b4899285d73d0f0a2b9ad18062a062c01c8bdb2f720a',
+      signature: '3045022100a613d9a094fac52779b29c40ba6c82e8deb047e45bda90f9b15e976286d2e3a7022017f4dead5f9241f31f47e7c4bfac6f052067a98021281394a5bc859c5fb251cc'
     },
-    revocationOutpoint: '000000000000000000000000000000000000000000000000000000000000000000000000',
-    certifier: '025384871bedffb233fdb0b4899285d73d0f0a2b9ad18062a062c01c8bdb2f720a',
-    signature: '3045022100a613d9a094fac52779b29c40ba6c82e8deb047e45bda90f9b15e976286d2e3a7022017f4dead5f9241f31f47e7c4bfac6f052067a98021281394a5bc859c5fb251cc'
+    serverNonce: 'UFX3UUGl4L76T9v3M2YLd/Es25CEwAAoGTowblLtM3s='
   },
   func: async (req, res, server) => {
     try {
-      const checkError = server.certifierSignCheckArgs({
-        ...req.body,
-      })
-
-      if (checkError) {
+      const { clientNonce, type, fields, keyring } = req.body
+      // Validate params
+      try {
+        server.certifierSignCheckArgs(req.body)
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Invalid parameters'
         return res.status(400).json({
           status: 'error',
-          ...checkError
+          description: message
         })
       }
 
-      // Save the sender's identityKey as the subject of the certificate
-      req.body.subject = req.authrite.identityKey
+      // Verify the client actually created the provided nonce
+      await verifyNonce(clientNonce, server.wallet, req.auth.identityKey)
 
-      // Make sure this certificate has been verified
-      const results = await server.getVerificationProof(req.authrite.identityKey)
+      // Server creates a random nonce that the client can verify
+      const serverNonce = await createNonce(server.wallet, req.auth.identityKey)
+      // The server compute a serial number from the client and server nonce
+      const { hmac } = await server.wallet.createHmac({
+        data: Utils.toArray(clientNonce + serverNonce, 'base64'),
+        protocolID: [2, 'certificate issuance'],
+        keyID: serverNonce + clientNonce,
+        counterparty: req.auth.identityKey
+      })
+      const serialNumber = Utils.toBase64(hmac)
+      const decryptedFields: Record<CertificateFieldNameUnder50Bytes, string> = {}
 
-      // Make sure a validated verificationId is been added and the certificate is not already expired
-      if (!results || !results.verificationId || !results.expirationDate || (new Date(results.expirationDate) < new Date())) {
-        return res.status(400).json({
-          status: 'error',
-          code: 'ERR_CERTIFICATE_NOT_VALID',
-          description: 'The identity certificate information has not been verified or is expired!'
-        })
+      // Decrypt and verify fields
+      // TODO: Move to shared helper function in ts-sdk
+      try {
+        // Note: we want to iterate through all fields, not just masterKeyring keys/value pairs.
+        for (const fieldName of Object.keys(fields)) {
+          const { plaintext: fieldRevelationKey } = await server.wallet.decrypt({
+            ciphertext: Utils.toArray(keyring[fieldName], 'base64'),
+            counterparty: req.auth.identityKey,
+            ...Certificate.getCertificateFieldEncryptionDetails(serialNumber, fieldName)
+          })
+
+          const fieldValue = new SymmetricKey(fieldRevelationKey).decrypt(Utils.toArray(fields[fieldName], 'base64'))
+          decryptedFields[fieldName] = Utils.toUTF8(fieldValue as number[])
+        }
+      } catch (e) {
+        throw new Error('Failed to decrypt all certificate fields.')
       }
 
-      // Check encrypted fields and decrypt them
-      const decryptedFields = await server.decryptCertificateFields(req.body, req.body.keyring)
-      const expectedFields = certificateFields
+      // TODO: Validate the decryptedFields based on your specific requirements and the certificate type.
+      // If previous validation was done by a third-party service (ex. Persona API), you can check the results here.
+      // Ex. await server.getVerificationProof(decryptedFields.metadata.verificationId)
 
-      // Only validate the expected field keys?
-      if (!expectedFields.every(x => !!decryptedFields[x])) {
-        return res.status(400).json({
-          status: 'error',
-          code: 'ERR_EXPECTED_FIELDS',
-          description: 'One or more expected certificate fields is missing or invalid.'
+      // Create a revocation outpoint
+      const revocationOutputTags: string[] = []
+      for (const [fieldName, fieldValue] of Object.entries(decryptedFields)) {
+        // Create tags to find this output based on metadata
+        // Ex. { firstName: 'John', lastName: 'Smith' }
+        const { hmac: hashedField } = await server.wallet.createHmac({
+          protocolID: [2, 'revocation output tagging'],
+          keyID: `${serialNumber} ${fieldName}`,
+          counterparty: req.auth.identityKey,
+          data: Utils.toArray(fieldValue, 'utf8')
         })
+        revocationOutputTags.push(`${fieldName} ${Utils.toBase64(hashedField)}`)
       }
-/*
-      // Derive a new key for the revocation tx locking script
-      const derivedPrivateKey = getPaymentPrivateKey({
-        recipientPrivateKey: SERVER_PRIVATE_KEY,
-        senderPublicKey: new bsv.PrivateKey(SERVER_PRIVATE_KEY).publicKey.toString('hex'),
-        invoiceNumber
-      })
 
-      // Create a pushdrop revocation token with the serial number of the certificate to sign
-      const lockingScript = await pushdrop.create({
-        fields: [
-          Buffer.from(req.body.serialNumber)
-        ],
-        key: derivedPrivateKey
-      })
+      // Create a locking script the serial number as push data
+      // Use random data for key derivation to prevent key-reuse
+      const derivationPrefix = Utils.toBase64(Random(10))
+      const derivationSuffix = Utils.toBase64(Random(10))
+      // Note: The revocation output could contain encrypted metadata the certifier wants to keep track of
+      // TODO: Make this 1 of 2 so that the subject can revoke the certificate as well.
+      const lockingScript = await new PushDrop(server.wallet).lock(
+        [Utils.toArray(serialNumber)], // Do we want this serial number to be public?
+        [2, 'certificate revocation'],
+        `${derivationPrefix} ${derivationSuffix}`,
+        req.auth.identityKey
+      )
 
-      // Hmac the user data to tag for privacy
-      const firstNameHmac = crypto.createHmac('sha256', SERVER_PRIVATE_KEY)
-        .update(decryptedFields.firstName)
-        .digest('hex')
-      const lastNameHmac = crypto.createHmac('sha256', SERVER_PRIVATE_KEY)
-        .update(decryptedFields.lastName)
-        .digest('hex')
-      const subjectHmac = crypto.createHmac('sha256', SERVER_PRIVATE_KEY)
-        .update(req.body.subject)
-        .digest('hex')
-
-      // Create a new Bitcoin transaction
-      const tx = await ninja.getTransactionWithOutputs({
+      // Create certificate revocation output
+      const args: CreateActionArgs = {
+        description: 'New certificate revocation output',
         outputs: [{
-          satoshis: 500,
-          script: lockingScript,
-          tags: [`firstName ${firstNameHmac}`, `lastName ${lastNameHmac}`, `subject ${subjectHmac}`],
+          lockingScript: lockingScript.toHex(),
+          satoshis: 1,
+          outputDescription: 'Certificate revocation output',
+          basket: 'certificate revocation',
+          tags: [`certificate-revocation-for-${req.auth.identityKey}`, ...revocationOutputTags],
           customInstructions: JSON.stringify({
             derivationPrefix,
             derivationSuffix
           })
-        }],
-        labels: [
-          'generic-cert'
-        ],
-        note: 'GenericCert Certificate Issuance',
-        autoProcess: true
-      })
+        }]
+      }
 
-      // Set the revocation outpoint for this certificate
-      const revocationOutpoint = tx.txid + '00000000'
+      const { txid: revocationTxid } = await server.wallet.createAction(args)
 
-      const certificate = certifierCreateSignedCertificate({
-        ...req.body,
-        revocationOutpoint,
-        certifierPrivateKey,
-        certificateType
-      })
+      const signedCertificate = new Certificate(
+        type,
+        serialNumber,
+        req.auth.identityKey,
+        server.wallet.identityKey,
+        `${revocationTxid}.0`, // TODO: verify revocation outpoint format
+        fields
+      )
 
-      // Save certificate data and revocation key derivation information
-      await saveCertificate(req.authrite.identityKey, certificate, tx, derivationPrefix, derivationSuffix)
-*/
+      await signedCertificate.sign(server.wallet)
+
+      // TODO: Save certificate data and revocation key derivation information
+      // Ex. await saveCertificate(req.authrite.identityKey, certificate, tx, derivationPrefix, derivationSuffix)
+
       // Returns signed cert to the requester
-      const certificate = {}
-      return res.status(200).json(certificate)
+      return res.status(200).json({
+        certificate: signedCertificate,
+        serverNonce
+      })
     } catch (e) {
       console.error(e)
       return res.status(500).json({

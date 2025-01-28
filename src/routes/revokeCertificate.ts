@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { CertifierRoute } from '../CertifierServer'
 
 export const revokeCertificate: CertifierRoute = {
@@ -6,27 +5,24 @@ export const revokeCertificate: CertifierRoute = {
   path: '/revokeCertificate',
   summary: 'Revokes a previously issued identity certificate',
   parameters: {
-    identityKey: 'identityKeyToRevoke',
     serialNumber: 'abc'
   },
   exampleResponse: {
-    status: 'verified | notVerified'
+    status: 'success'
   },
   func: async (req, res, server) => {
     try {
       // Make sure only authorized users can revoke certificates
-      /*
-      if (req.authrite.identityKey !== new bsv.PrivateKey(SERVER_PRIVATE_KEY).publicKey.toString('hex')) {
+      if (req.auth.identityKey !== server.wallet.identityKey) {
         return res.status(400).json({
           status: 'error',
           code: 'ERR_UNAUTHORIZED',
           description: 'You are not authorized to access this route!'
         })
       }
-      */
 
       // Make sure the required params are provided
-      if (!req.body.identityKey && !req.body.serialNumber) {
+      if (!req.body.serialNumber) {
         return res.status(400).json({
           status: 'error',
           code: 'ERR_INVALID_PARAMS',
@@ -34,73 +30,22 @@ export const revokeCertificate: CertifierRoute = {
         })
       }
 
-      const revocationData = await server.getRevocationData(req.body.identityKey, req.body.serialNumber)
+      // TODO: Get the revocation data from your storage, and use createAction to spend the outpoint.
+      // const revocationData = await server.getRevocationData(req.body.identityKey, req.body.serialNumber)
+      // if (!revocationData) {
+      //   return res.status(400).json({
+      //     status: 'error',
+      //     code: 'ERR_MISSING_REVOCATION_DATA',
+      //     description: 'Insufficient data to revoke certificate!'
+      //   })
+      // }
 
-      if (!revocationData) {
-        return res.status(400).json({
-          status: 'error',
-          code: 'ERR_MISSING_REVOCATION_DATA',
-          description: 'Insufficient data to revoke certificate!'
-        })
-      }
-/*
-      // Create an actual spendable revocation outpoint
-      const ninja = new Ninja({
-        privateKey: SERVER_PRIVATE_KEY,
-        config: {
-          dojoURL: DOJO_URL
-        }
-      })
-
-      // Random key derivation data
-      const derivationPrefix = revocationData.derivationPrefix
-      const derivationSuffix = revocationData.derivationSuffix
-      const invoiceNumber = `2-3241645161d8-${derivationPrefix} ${derivationSuffix}`
-
-      // Derive a new key for the revocation tx locking script
-      const derivedPrivateKey = getPaymentPrivateKey({
-        recipientPrivateKey: SERVER_PRIVATE_KEY,
-        senderPublicKey: new bsv.PrivateKey(SERVER_PRIVATE_KEY).publicKey.toString('hex'),
-        invoiceNumber
-      })
-
-      const prevTx = new bsv.Transaction(revocationData.tx.rawTx)
-      const defaultVout = 0
-
-      // Create a unlocking script for the pushdrop revocation token
-      const unlockingScript = await pushdrop.redeem({
-        prevTxId: revocationData.tx.txid,
-        outputIndex: defaultVout,
-        lockingScript: prevTx.outputs[defaultVout].script.toHex(),
-        outputAmount: prevTx.outputs[defaultVout].satoshis,
-        key: derivedPrivateKey
-      })
-
-      // Create a new Bitcoin transaction to spend the revocation token
-      const tx = await ninja.getTransactionWithOutputs({
-        inputs: {
-          [revocationData.tx.txid]: {
-            ...revocationData.tx,
-            outputsToRedeem: [{
-              index: defaultVout,
-              unlockingScript
-            }]
-          }
-        },
-        labels: [
-          'genericCert'
-        ],
-        note: 'GenericCert Certificate Revocation',
-        autoProcess: true
-      })
-
-      // Save record of revoking the certificate
-      await server.insertRevocationRecord(revocationData._id, tx)
-*/
+      // TODO: Save record of revoking the certificate
+      // await server.insertRevocationRecord(revocationData._id, tx)
 
       return res.status(200).json({
         status: 'success',
-        description: `Certificate ${revocationData.certificate.serialNumber} successfully revoked!`
+        description: `Certificate successfully revoked!`
       })
     } catch (error) {
       console.error(error)
