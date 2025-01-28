@@ -1,6 +1,6 @@
 {
   "name": "generic-certifier-backend",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Certificate Authority for issuing Generic Certificates",
   "author": "Peer-to-peer Privacy Systems Research LLC",
   "license": "SEE LICENSE IN LICENSE.txt",
