@@ -29,6 +29,8 @@ async function setupCertifierServer(): Promise<{
     if (!SERVER_PRIVATE_KEY) {
       throw new Error('SERVER_PRIVATE_KEY must be set')
     }
+
+    // Enable storage as needed --------------------------------
     // if (!KNEX_DB_CONNECTION) {
     //   throw new Error('KNEX_DB_CONNECTION must be set')
     // }
@@ -53,6 +55,8 @@ async function setupCertifierServer(): Promise<{
     // const knex = makeKnex(knexConfig)
 
     const chain: sdk.Chain = NODE_ENV === 'development' ? 'test' : 'main'
+
+    // Enable storage as needed --------------------------------
     // const storage = new CertifierStorage(knex, chain)
     // await storage.migrate()
     // await storage.makeAvailable()
