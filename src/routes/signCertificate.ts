@@ -85,7 +85,7 @@ export const signCertificate: CertifierRoute = {
         req.auth.identityKey
       )
 
-      console.log(`Decrypted Fields: ${decryptedFields}`)
+      console.log(`Decrypted Fields:`, decryptedFields)
 
       // TODO: Validate the decryptedFields based on your specific requirements and the certificate type.
       // If previous validation was done by a third-party service (ex. Persona API), you can check the results here.
