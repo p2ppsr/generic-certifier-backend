@@ -149,7 +149,7 @@ export const signCertificate: CertifierRoute = {
       await signedCertificate.sign(server.wallet)
 
       // TODO: Save certificate data and revocation key derivation information
-      // Ex. await saveCertificate(req.authrite.identityKey, certificate, tx, derivationPrefix, derivationSuffix)
+      // Ex. await saveCertificate(req.auth.identityKey, certificate, tx, derivationPrefix, derivationSuffix)
 
       // Returns signed cert to the requester
       return res.status(200).json({

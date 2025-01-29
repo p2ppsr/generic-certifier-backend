@@ -1,6 +1,6 @@
 // GenericCert Certificate Type Definition
 //
-// An Authrite Certifier defines one or more certificate types that they issue and manage.
+// A Certifier defines one or more certificate types that they issue and manage.
 // The certificate type encompasses a list of fields and their expected and valid values.
 // A certificate type is assigned a unique identifier which must be a random 32 byte value
 // encoded as a base64 string.
