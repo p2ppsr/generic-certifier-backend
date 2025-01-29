@@ -77,7 +77,7 @@ export const signCertificate: CertifierRoute = {
       })
       const serialNumber = Utils.toBase64(hmac)
 
-      // Once we have this verifiable Certificate, we should try to decrypt and verify the fields.
+      // Decrypt certificate fields and verify them before signing
       const decryptedFields = await MasterCertificate.decryptFields(
         server.wallet,
         masterKeyring,
