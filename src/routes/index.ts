@@ -1,5 +1,3 @@
-export * from './initialRequest'
-export * from './identify'
 export * from './checkVerification'
 export * from './signCertificate'
 export * from './revokeCertificate'

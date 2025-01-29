@@ -29,33 +29,33 @@ async function setupCertifierServer(): Promise<{
     if (!SERVER_PRIVATE_KEY) {
       throw new Error('SERVER_PRIVATE_KEY must be set')
     }
-    if (!KNEX_DB_CONNECTION) {
-      throw new Error('KNEX_DB_CONNECTION must be set')
-    }
+    // if (!KNEX_DB_CONNECTION) {
+    //   throw new Error('KNEX_DB_CONNECTION must be set')
+    // }
     // Parse database connection details
-    const connection = JSON.parse(KNEX_DB_CONNECTION)
+    // const connection = JSON.parse(KNEX_DB_CONNECTION)
     // You can also use an imported knex configuration file.
-    const knexConfig: Knex.Config = {
-      client: 'mysql2',
-      connection,
-      useNullAsDefault: true,
-      pool: {
-        min: 2,
-        max: 10,
-        createTimeoutMillis: 10000,
-        acquireTimeoutMillis: 30000,
-        idleTimeoutMillis: 600000,
-        reapIntervalMillis: 60000,
-        createRetryIntervalMillis: 200,
-        propagateCreateError: false
-      }
-    }
-    const knex = makeKnex(knexConfig)
+    // const knexConfig: Knex.Config = {
+    //   client: 'mysql2',
+    //   connection,
+    //   useNullAsDefault: true,
+    //   pool: {
+    //     min: 2,
+    //     max: 10,
+    //     createTimeoutMillis: 10000,
+    //     acquireTimeoutMillis: 30000,
+    //     idleTimeoutMillis: 600000,
+    //     reapIntervalMillis: 60000,
+    //     createRetryIntervalMillis: 200,
+    //     propagateCreateError: false
+    //   }
+    // }
+    // const knex = makeKnex(knexConfig)
 
     const chain: sdk.Chain = NODE_ENV === 'development' ? 'test' : 'main'
-    const storage = new CertifierStorage(knex, chain)
-    await storage.migrate()
-    await storage.makeAvailable()
+    // const storage = new CertifierStorage(knex, chain)
+    // await storage.migrate()
+    // await storage.makeAvailable()
 
     // Example wallet
     const { wallet } = await test._tu.createTestWalletWithStorageClient({
@@ -68,7 +68,7 @@ async function setupCertifierServer(): Promise<{
     const serverOptions: CertifierServerOptions = {
       port: Number(HTTP_PORT),
       wallet,
-      storage, // Storage optional for this example!
+      // undefined, // Storage optional for this example!
       monetize: false,
       calculateRequestPrice: async () => {
         return 0 // Monetize your server here! Price is in satoshis.

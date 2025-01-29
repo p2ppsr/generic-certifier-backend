@@ -9,7 +9,7 @@ import * as routes from './routes'
 export interface CertifierServerOptions {
   port: number
   wallet: Wallet
-  storage: CertifierStorage
+  // storage: CertifierStorage
   monetize: boolean
   calculateRequestPrice?: (req: Request) => number | Promise<number>
 }
@@ -37,7 +37,7 @@ export class CertifierServer {
     this.storage = storage
     this.port = options.port
     this.wallet = options.wallet
-    this.storage = options.storage
+    // this.storage = options.storage
     this.monetize = options.monetize
     this.calculateRequestPrice = options.calculateRequestPrice
 
@@ -101,7 +101,7 @@ export class CertifierServer {
    * @param {object} args
    * @throws {Error} if any of the required arguments are missing
    */
-  certifierSignCheckArgs(args: { clientNonce: string, type: string, fields: Record<string, string>, keyring: Record<string, string> }): void {
+  certifierSignCheckArgs(args: { clientNonce: string, type: string, fields: Record<string, string>, masterKeyring: Record<string, string> }): void {
     if (!args.clientNonce) {
       throw new Error('Missing client nonce!')
     }
@@ -111,8 +111,8 @@ export class CertifierServer {
     if (!args.fields) {
       throw new Error('Missing certificate fields to sign!')
     }
-    if (!args.keyring) {
-      throw new Error('Missing keyring to decrypt fields!')
+    if (!args.masterKeyring) {
+      throw new Error('Missing masterKeyring to decrypt fields!')
     }
   }
 }

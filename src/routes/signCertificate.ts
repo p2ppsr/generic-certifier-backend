@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Certificate, CertificateFieldNameUnder50Bytes, CreateActionArgs, createNonce, MasterCertificate, PushDrop, Random, SymmetricKey, Utils, verifyNonce } from '@bsv/sdk'
+import { Certificate, CertificateFieldNameUnder50Bytes, CreateActionArgs, createNonce, MasterCertificate, PushDrop, Random, SymmetricKey, Utils, VerifiableCertificate, verifyNonce } from '@bsv/sdk'
 import { certificateFields } from '../certificates/genericCert'
 import { CertifierRoute } from '../CertifierServer'
 
@@ -51,7 +51,7 @@ export const signCertificate: CertifierRoute = {
   },
   func: async (req, res, server) => {
     try {
-      const { clientNonce, type, fields, keyring } = req.body
+      const { clientNonce, type, fields, masterKeyring } = req.body
       // Validate params
       try {
         server.certifierSignCheckArgs(req.body)
@@ -76,74 +76,66 @@ export const signCertificate: CertifierRoute = {
         counterparty: req.auth.identityKey
       })
       const serialNumber = Utils.toBase64(hmac)
-      const decryptedFields: Record<CertificateFieldNameUnder50Bytes, string> = {}
 
-      // Decrypt and verify fields
-      // TODO: Move to shared helper function in ts-sdk
-      try {
-        // Note: we want to iterate through all fields, not just masterKeyring keys/value pairs.
-        for (const fieldName of Object.keys(fields)) {
-          const { plaintext: fieldRevelationKey } = await server.wallet.decrypt({
-            ciphertext: Utils.toArray(keyring[fieldName], 'base64'),
-            counterparty: req.auth.identityKey,
-            ...Certificate.getCertificateFieldEncryptionDetails(serialNumber, fieldName)
-          })
+      // Once we have this verifiable Certificate, we should try to decrypt and verify the fields.
+      const decryptedFields = await MasterCertificate.decryptFields(
+        server.wallet,
+        masterKeyring,
+        fields,
+        req.auth.identityKey
+      )
 
-          const fieldValue = new SymmetricKey(fieldRevelationKey).decrypt(Utils.toArray(fields[fieldName], 'base64'))
-          decryptedFields[fieldName] = Utils.toUTF8(fieldValue as number[])
-        }
-      } catch (e) {
-        throw new Error('Failed to decrypt all certificate fields.')
-      }
+      console.log(`Decrypted Fields: ${decryptedFields}`)
 
       // TODO: Validate the decryptedFields based on your specific requirements and the certificate type.
       // If previous validation was done by a third-party service (ex. Persona API), you can check the results here.
       // Ex. await server.getVerificationProof(decryptedFields.metadata.verificationId)
 
       // Create a revocation outpoint
-      const revocationOutputTags: string[] = []
-      for (const [fieldName, fieldValue] of Object.entries(decryptedFields)) {
-        // Create tags to find this output based on metadata
-        // Ex. { firstName: 'John', lastName: 'Smith' }
-        const { hmac: hashedField } = await server.wallet.createHmac({
-          protocolID: [2, 'revocation output tagging'],
-          keyID: `${serialNumber} ${fieldName}`,
-          counterparty: req.auth.identityKey,
-          data: Utils.toArray(fieldValue, 'utf8')
-        })
-        revocationOutputTags.push(`${fieldName} ${Utils.toBase64(hashedField)}`)
-      }
+      // const revocationOutputTags: string[] = []
+      // for (const [fieldName, fieldValue] of Object.entries(decryptedFields)) {
+      //   // Create tags to find this output based on metadata
+      //   // Ex. { firstName: 'John', lastName: 'Smith' }
+      //   const { hmac: hashedField } = await server.wallet.createHmac({
+      //     protocolID: [2, 'revocation output tagging'],
+      //     keyID: `${serialNumber} ${fieldName}`,
+      //     counterparty: req.auth.identityKey,
+      //     data: Utils.toArray(fieldValue, 'utf8')
+      //   })
+      //   revocationOutputTags.push(`${fieldName} ${Utils.toBase64(hashedField)}`)
+      // }
 
-      // Create a locking script the serial number as push data
-      // Use random data for key derivation to prevent key-reuse
-      const derivationPrefix = Utils.toBase64(Random(10))
-      const derivationSuffix = Utils.toBase64(Random(10))
-      // Note: The revocation output could contain encrypted metadata the certifier wants to keep track of
-      // TODO: Make this 1 of 2 so that the subject can revoke the certificate as well.
-      const lockingScript = await new PushDrop(server.wallet).lock(
-        [Utils.toArray(serialNumber)], // Do we want this serial number to be public?
-        [2, 'certificate revocation'],
-        `${derivationPrefix} ${derivationSuffix}`,
-        req.auth.identityKey
-      )
+      // // Create a locking script the serial number as push data
+      // // Use random data for key derivation to prevent key-reuse
+      // const derivationPrefix = Utils.toBase64(Random(10))
+      // const derivationSuffix = Utils.toBase64(Random(10))
+      // // Note: The revocation output could contain encrypted metadata the certifier wants to keep track of
+      // // TODO: Make this 1 of 2 so that the subject can revoke the certificate as well.
+      // const lockingScript = await new PushDrop(server.wallet).lock(
+      //   [Utils.toArray(serialNumber)], // Do we want this serial number to be public?
+      //   [2, 'certificate revocation'],
+      //   `${derivationPrefix} ${derivationSuffix}`,
+      //   req.auth.identityKey
+      // )
 
-      // Create certificate revocation output
-      const args: CreateActionArgs = {
-        description: 'New certificate revocation output',
-        outputs: [{
-          lockingScript: lockingScript.toHex(),
-          satoshis: 1,
-          outputDescription: 'Certificate revocation output',
-          basket: 'certificate revocation',
-          tags: [`certificate-revocation-for-${req.auth.identityKey}`, ...revocationOutputTags],
-          customInstructions: JSON.stringify({
-            derivationPrefix,
-            derivationSuffix
-          })
-        }]
-      }
+      // // Create certificate revocation output
+      // const args: CreateActionArgs = {
+      //   description: 'New certificate revocation output',
+      //   outputs: [{
+      //     lockingScript: lockingScript.toHex(),
+      //     satoshis: 1,
+      //     outputDescription: 'Certificate revocation output',
+      //     basket: 'certificate revocation',
+      //     tags: [`certificate-revocation-for-${req.auth.identityKey}`, ...revocationOutputTags],
+      //     customInstructions: JSON.stringify({
+      //       derivationPrefix,
+      //       derivationSuffix
+      //     })
+      //   }]
+      // }
 
-      const { txid: revocationTxid } = await server.wallet.createAction(args)
+      // const { txid: revocationTxid } = await server.wallet.createAction(args)
+      const revocationTxid = 'not supported'
 
       const signedCertificate = new Certificate(
         type,
