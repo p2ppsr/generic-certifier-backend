@@ -1,6 +1,6 @@
 {
   "name": "generic-certifier-backend",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Certificate Authority for issuing Generic Certificates",
   "author": "Peer-to-peer Privacy Systems Research LLC",
   "license": "SEE LICENSE IN LICENSE.txt",
@@ -47,6 +47,6 @@
     "express": "^4.18.2",
     "knex": "^3.1.0",
     "mysql2": "^3.12.0",
-    "wallet-storage": "^0.0.40"
+    "wallet-storage": "^0.0.41"
   }
 }
