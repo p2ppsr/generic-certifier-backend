@@ -1,5 +1,5 @@
 import { Base64String, HexString, OutpointString, PubKeyHex } from '@bsv/sdk'
-import { sdk } from "wallet-storage"
+import { sdk } from '@bsv/wallet-toolbox'
 import { CertificateField } from './CertificateField'
 
 export interface Certificate extends sdk.EntityTimeStamp {

@@ -1,12 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import * as bsv from '@bsv/sdk'
-import {
-  sdk
-} from 'wallet-storage'
 import { spawn } from 'child_process'
 import * as dotenv from 'dotenv'
 import { CertifierServer, CertifierServerOptions } from './CertifierServer'
 import { Setup } from '@bsv/wallet-toolbox'
+import { Chain } from '@bsv/wallet-toolbox/out/src/sdk'
 
 dotenv.config()
 
@@ -15,7 +12,7 @@ const {
   NODE_ENV = 'development',
   HTTP_PORT = 3998,
   SERVER_PRIVATE_KEY,
-  STORAGE_URL,
+  WALLET_STORAGE_URL,
   KNEX_DB_CONNECTION
 } = process.env
 
@@ -53,7 +50,7 @@ async function setupCertifierServer(): Promise<{
     // }
     // const knex = makeKnex(knexConfig)
 
-    const chain: sdk.Chain = NODE_ENV === 'development' ? 'test' : 'main'
+    const chain: Chain = NODE_ENV === 'development' ? 'test' : 'main'
 
     // Enable storage as needed --------------------------------
     // const storage = new CertifierStorage(knex, chain)
@@ -63,7 +60,7 @@ async function setupCertifierServer(): Promise<{
     const wallet = await Setup.createWalletClientNoEnv({
       chain,
       rootKeyHex: SERVER_PRIVATE_KEY,
-      storageUrl: STORAGE_URL
+      storageUrl: WALLET_STORAGE_URL
     })
 
     // Set up server options

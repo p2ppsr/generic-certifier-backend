@@ -1,5 +1,5 @@
 import { Base64String } from '@bsv/sdk'
-import { sdk } from "wallet-storage"
+import { sdk } from '@bsv/wallet-toolbox'
 
 export interface CertificateField extends sdk.EntityTimeStamp {
    created_at: Date
@@ -9,5 +9,3 @@ export interface CertificateField extends sdk.EntityTimeStamp {
    fieldValue: string
    masterKey: Base64String
 }
-
-

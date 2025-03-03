@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Knex } from 'knex'
-import { sdk } from 'wallet-storage';
+import { sdk } from '@bsv/wallet-toolbox'
 
 interface Migration {
     up: (knex: Knex) => Promise<void>;
@@ -35,12 +35,12 @@ export class KnexMigrations implements MigrationSource<string> {
     getMigrationName(migration: string) { return migration }
     async getMigration(migration: string): Promise<Migration> { return this.migrations[migration] }
 
-    async getLatestMigration() : Promise<string> {
+    async getLatestMigration(): Promise<string> {
         const ms = await this.getMigrations()
         return ms[ms.length - 1]
     }
 
-    static async latestMigration() : Promise<string> {
+    static async latestMigration(): Promise<string> {
         const km = new KnexMigrations('test')
         return await km.getLatestMigration()
     }

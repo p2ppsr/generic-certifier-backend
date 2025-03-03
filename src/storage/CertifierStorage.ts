@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { sdk, verifyOne } from 'wallet-storage'
+import { sdk, verifyOne } from '@bsv/wallet-toolbox'
 import { KnexMigrations, table } from '.'
 
 import { Knex } from 'knex'
@@ -11,7 +11,8 @@ export class CertifierStorage {
   }
 
   async makeAvailable(): Promise<table.Settings> {
-      return this._settings = await this.readSettings()
+    this._settings = await this.readSettings()
+    return this._settings
   }
 
   private async readSettings(): Promise<table.Settings> {
