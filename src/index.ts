@@ -1,14 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import * as bsv from '@bsv/sdk'
 import {
-  test,
   sdk
 } from 'wallet-storage'
-import { Knex, knex as makeKnex } from 'knex'
 import { spawn } from 'child_process'
 import * as dotenv from 'dotenv'
 import { CertifierServer, CertifierServerOptions } from './CertifierServer'
-import { CertifierStorage } from './storage'
+import { Setup } from '@bsv/wallet-toolbox'
 
 dotenv.config()
 
@@ -17,16 +15,17 @@ const {
   NODE_ENV = 'development',
   HTTP_PORT = 3998,
   SERVER_PRIVATE_KEY,
+  STORAGE_URL,
   KNEX_DB_CONNECTION
-} = process.env;
+} = process.env
 
-export let certifierPublicKey: string = ''
+export const certifierPublicKey: string = ''
 
 async function setupCertifierServer(): Promise<{
   server: CertifierServer
 }> {
   try {
-    if (!SERVER_PRIVATE_KEY) {
+    if (SERVER_PRIVATE_KEY === undefined) {
       throw new Error('SERVER_PRIVATE_KEY must be set')
     }
 
@@ -61,11 +60,10 @@ async function setupCertifierServer(): Promise<{
     // await storage.migrate()
     // await storage.makeAvailable()
 
-    // Example wallet
-    const { wallet } = await test._tu.createTestWalletWithStorageClient({
+    const wallet = await Setup.createWalletClientNoEnv({
       chain,
       rootKeyHex: SERVER_PRIVATE_KEY,
-      endpointUrl: undefined // Choose you wallet server or build a different kind of wallet.
+      storageUrl: STORAGE_URL
     })
 
     // Set up server options
@@ -94,7 +92,6 @@ async function setupCertifierServer(): Promise<{
   try {
     const context = await setupCertifierServer()
     console.log('generic-certifier server v0.1.0')
-    //console.log(JSON.stringify(context.settings, null, 2))
 
     context.server.start()
     console.log('generic-certifier server started')
@@ -105,8 +102,7 @@ async function setupCertifierServer(): Promise<{
       spawn('nginx', [], { stdio: ['inherit', 'inherit', 'inherit'] })
       console.log('nginx is up!')
     }
-
   } catch (error) {
     console.error('Error starting server:', error)
   }
-})()
+})().catch(e => console.error(e))

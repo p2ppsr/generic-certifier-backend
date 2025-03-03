@@ -13,7 +13,7 @@ export const revokeCertificate: CertifierRoute = {
   func: async (req, res, server) => {
     try {
       // Make sure only authorized users can revoke certificates
-      if (req.auth.identityKey !== server.wallet.identityKey) {
+      if (req.auth.identityKey !== (await server.wallet.getPublicKey({ identityKey: true })).publicKey) {
         return res.status(400).json({
           status: 'error',
           code: 'ERR_UNAUTHORIZED',
@@ -22,7 +22,7 @@ export const revokeCertificate: CertifierRoute = {
       }
 
       // Make sure the required params are provided
-      if (!req.body.serialNumber) {
+      if (req.body.serialNumber === undefined) {
         return res.status(400).json({
           status: 'error',
           code: 'ERR_INVALID_PARAMS',
@@ -45,7 +45,7 @@ export const revokeCertificate: CertifierRoute = {
 
       return res.status(200).json({
         status: 'success',
-        description: `Certificate successfully revoked!`
+        description: 'Certificate successfully revoked!'
       })
     } catch (error) {
       console.error(error)

@@ -2,13 +2,12 @@ import { WalletInterface } from '@bsv/sdk'
 import express, { Request, Response } from 'express'
 import { AuthMiddlewareOptions, createAuthMiddleware } from '@bsv/auth-express-middleware'
 import { createPaymentMiddleware } from '@bsv/payment-express-middleware'
-import { Wallet } from 'wallet-storage'
 import { CertifierStorage } from './storage'
 import * as routes from './routes'
 
 export interface CertifierServerOptions {
   port: number
-  wallet: Wallet
+  wallet: WalletInterface
   // storage: CertifierStorage // Enable as needed
   monetize: boolean
   calculateRequestPrice?: (req: Request) => number | Promise<number>
@@ -26,12 +25,12 @@ export interface CertifierRoute {
 }
 
 export class CertifierServer {
-  private app = express()
-  private port: number
-  private storage: CertifierStorage
-  wallet: Wallet
-  private monetize: boolean
-  private calculateRequestPrice?: (req: Request) => number | Promise<number>
+  private readonly app = express()
+  private readonly port: number
+  private readonly storage: CertifierStorage
+  wallet: WalletInterface
+  private readonly monetize: boolean
+  private readonly calculateRequestPrice?: (req: Request) => number | Promise<number>
 
   constructor(storage: any, options: CertifierServerOptions) {
     this.storage = storage
@@ -64,7 +63,7 @@ export class CertifierServer {
 
     // Configure the auth and payment middleware
     this.app.use(createAuthMiddleware({
-      wallet: this.wallet as WalletInterface
+      wallet: this.wallet
     }))
     if (this.monetize) {
       this.app.use(
