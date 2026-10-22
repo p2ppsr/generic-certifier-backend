@@ -11,6 +11,7 @@ COPY ./nginx.conf /etc/nginx/nginx.conf
 EXPOSE 8080
 WORKDIR /app
 COPY . .
-RUN npm i knex -g && \
+RUN npm ci && \
+    npm i knex -g && \
     npm run build
 CMD [ "node", "out/src/index.js"]
